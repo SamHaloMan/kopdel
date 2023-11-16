@@ -1,0 +1,122 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity", "interactiveTransactions"]
+}
+
+// TiDB is highly compatible with the MySQL 5.7 protocol and the common features 
+// and syntax of MySQL 5.7.
+//
+// TiDB currently does not support foreign key constraints. If you need to use the feature of 
+// referential integrity, you can use the application layer implementation of prisma.
+//
+// Refercene: https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-integrity#handling-the-referential-integrity-in-prisma
+// Related Issue [WIP]: https://github.com/pingcap/tidb/issues/18209
+// 
+// More descriptions about MySQL compatibility:
+// Refercene: https://docs.pingcap.com/tidb/dev/mysql-compatibility
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+// 
+// https://www.prisma.io/docs/concepts/components/prisma-schema/data-model
+
+model Owner {
+  id        BigInt         @id
+  name      String         @db.VarChar(100)
+  gender    Boolean?
+  birthYear Int?           @map("birth_year") @db.SmallInt
+  products  ProductOwner[]
+  Image     Image[]
+
+  @@map("owners")
+}
+
+model ProductOwner {
+  product   Product @relation(fields: [productId], references: [id])
+  productId BigInt  @map("product_id")
+  owner     Owner   @relation(fields: [ownerId], references: [id])
+  ownerId   BigInt  @map("owner_id")
+
+  @@id([productId, ownerId])
+  @@map("product_owners")
+}
+
+model Product {
+  id        BigInt         @id
+  title     String         @db.VarChar(100)
+  type      ProductType
+  stockedAt DateTime       @map("stocked_at") @db.DateTime(0)
+  stock     Int            @default(0)
+  price     Decimal        @default(0.0) @db.Decimal(15, 2)
+  owners    ProductOwner[]
+  ratings   Rating[]
+  orders    Order[]
+  images    Image[]
+
+  @@map("products")
+}
+
+model Order {
+  id        BigInt   @id @default(autoincrement())
+  product   Product  @relation(fields: [productId], references: [id])
+  productId BigInt   @map("product_id")
+  user      User     @relation(fields: [userId], references: [id])
+  userId    BigInt   @map("user_id")
+  quality   Int      @db.TinyInt
+  orderedAt DateTime @default(now()) @map("ordered_at") @db.DateTime(0)
+
+  @@index([productId])
+  @@map("orders")
+}
+
+model Rating {
+  product   Product  @relation(fields: [productId], references: [id])
+  productId BigInt   @map("product_id")
+  user      User     @relation(fields: [userId], references: [id])
+  userId    BigInt   @map("user_id")
+  score     Int      @db.TinyInt
+  ratedAt   DateTime @default(now()) @map("rated_at") @db.DateTime(0)
+
+  @@id([productId, userId])
+  @@unique([productId, userId], map: "uniq_product_user_idx")
+  @@map("ratings")
+}
+
+model User {
+  id       BigInt   @id
+  balance  Decimal  @default(0.0) @db.Decimal(15, 2)
+  nickname String   @unique(map: "nickname") @db.VarChar(100)
+  ratings  Rating[]
+  orders   Order[]
+
+  @@map("users")
+}
+
+model Image {
+  id        BigInt   @id
+  url       String
+  ownerId   BigInt   @map("owner_id")
+  owner     Owner    @relation(fields: [ownerId], references: [id])
+  Product   Product? @relation(fields: [productId], references: [id])
+  productId BigInt?
+
+  @@map("images")
+}
+
+// Because special characters cannot be used in the schema definition of the data model.
+// We use `_nbsp_` to represent one space and use `_amp_` to represent `&`.
+
+enum ProductType {
+  Snack
+  Peralatan
+  Minuman
+  Hampers
+  Selempang
+  Bouquet
+
+  @@map("products_type")
+}
