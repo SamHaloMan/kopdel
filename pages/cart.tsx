@@ -10,7 +10,7 @@ const Cart: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Shopping Cart</title>
+        <title>Shopping Cart | KoDel</title>
         <meta name='description' content='shopping cart' />
         <link rel='icon' href='/favicon.ico' />
       </Head>

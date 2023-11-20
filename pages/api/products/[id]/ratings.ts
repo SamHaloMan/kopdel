@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import { Prisma } from '@prisma/client';
+i
 import prisma from '../../../../lib/prisma'
 
 const ratingListHandler = async (

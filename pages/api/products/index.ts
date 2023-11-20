@@ -23,13 +23,20 @@ const productListHandler = async (
   res: NextApiResponse<any>
 ) => {
   if (req.method === 'GET') {
+    // try {
+    //   res.status(200).json(await getProductList(req));
+    // } catch (err: any) {
+    //   console.error(err)
+    //   res.status(500).json({
+    //     message: err.message
+    //   })
+    // }
     try {
-      res.status(200).json(await getProductList(req));
-    } catch (err: any) {
-      console.error(err)
-      res.status(500).json({
-        message: err.message
-      })
+      const products = await getProductList(req);
+      res.status(200).json(products);
+    } catch (err) {
+      console.error("Failed to fetch product list:", err);
+      res.status(500).json({ message: "Internal server error" });
     }
   } else {
     res.status(401).json({
@@ -58,6 +65,8 @@ async function getProductList(req: NextApiRequest) {
   });
   const productIds = products.map((b) => b.id);
 
+  
+
   // Grouping.
   //
   // Calculate the average rating score for the products in the result.
@@ -75,7 +84,6 @@ async function getProductList(req: NextApiRequest) {
         in: productIds
       }
     },
-    // Why must set orderBy?
     orderBy: {
       _avg: {
         score: 'asc'

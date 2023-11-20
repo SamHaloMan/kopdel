@@ -4,11 +4,13 @@ import {
   Bars3Icon,
   ShoppingCartIcon,
   BookOpenIcon,
+  UserIcon,
 } from '@heroicons/react/24/outline';
 
 import ProductTypeMenu from 'components/v2/Layout/ProductTypeMenu';
 import { shoppingCartState } from 'atoms';
 import { useRecoilState } from 'recoil';
+import { signIn, signOut, useSession } from "next-auth/react";
 
 import { calcCartItemSum } from 'lib/utils';
 
@@ -18,6 +20,7 @@ export interface HeaderProps {
 
 export default function Header(props: HeaderProps) {
   const { hideMenu } = props;
+  const { data: session } = useSession();
 
   const [shoppingCart, setShoppingCart] = useRecoilState(shoppingCartState);
 
@@ -40,7 +43,7 @@ export default function Header(props: HeaderProps) {
         <div className='navbar-center'>
           <NextLink href='/' className='btn btn-ghost normal-case text-xl'>
             <BookOpenIcon className='w-6 h-6' />
-            KoDel
+            Koperasi Del
           </NextLink>
         </div>
         <div className='navbar-end'>
@@ -53,12 +56,41 @@ export default function Header(props: HeaderProps) {
             </div>
           </NextLink>
 
-          {/* <button className='btn btn-ghost btn-circle'>
-              <div className='indicator'>
+          {session ? (
+            <div className='dropdown dropdown-end'>
+              <label tabIndex={0} className='btn btn-ghost btn-circle'>
                 <UserIcon className='w-6 h-6' />
-                <span className='badge badge-xs badge-primary indicator-item'></span>
-              </div>
-            </button> */}
+              </label>
+              <ul tabIndex={0} className='dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52'>
+                <li>
+                  <label>{session.user.name}</label>
+                </li>
+                <li>
+                  <label>{session.user.email}</label>
+                </li>
+                <li>
+                  <hr className='dropdown-divider' />
+                </li>
+                <li>
+                  <button className='btn btn-ghost' onClick={() => signOut()}>
+                    Logout
+                  </button>
+                </li>
+              </ul>
+            </div>
+          ) : (
+            <>
+              {/* <button className='btn btn-ghost' onClick={() => signIn()}>
+                Login
+              </button> */}
+              <NextLink href='/user/login'>
+                <label className='btn btn-ghost'>Login</label>
+              </NextLink>
+              <NextLink href='/user/register'>
+                <label className='btn btn-ghost'>Register</label>
+              </NextLink>
+            </>
+          )}
         </div>
       </div>
     </>

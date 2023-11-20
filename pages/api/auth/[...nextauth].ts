@@ -1,34 +1,34 @@
-import NextAuth from 'next-auth'
+import NextAuth from 'next-auth';
 import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from 'bcryptjs';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient()
 
 export default NextAuth({
-    // Configure one or more authentication providers
     providers: [
         CredentialsProvider({
-            // The name to display on the sign-in form (e.g. 'Sign in with...')
             name: 'Credentials',
-            // The credentials is used to generate a suitable form on the sign-in page.
-            // You can specify whatever fields you are expecting to be submitted.
-            // e.g. domain, username, password, 2FA token, etc.
-            // You can pass any HTML attribute to the input tag through the object.
             credentials: {
-                username: { label: "Username", type: "text", placeholder: "admin" },
+                email: { label: "Email", type: "email" },
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials, req) {
-                const user = { id: "1", name: "Admin", role: "admin", email: "admin@example.com" }
+                const user = await prisma.user.findFirst({
+                    where: {
+                        OR: [
+                            { email: credentials.identifier },
+                            { nickname: credentials.identifier }
+                        ]
+                    }
+                });
 
-                if (user) {
-                    return Promise.resolve(user)
+                if (user && bcrypt.compareSync(credentials.password, user.password)) {
+                    return { id: user.id, name: user.nickname, email: user.email, role: user.role };
                 } else {
-                    return Promise.resolve(null)
+                    throw new Error('Invalid Credentials');
                 }
             }
         })
     ],
-    // Use JSON Web Tokens for session instead of database sessions.
-    // This is optional but recommended if you want to scale horizontally.
-    jwt: {
-        secret: 'your-secret-token',
-    },
-})
+});

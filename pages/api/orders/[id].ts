@@ -1,18 +1,18 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import prisma from '../../../lib/prisma'
+import prisma from '../../../lib/prisma';
 
 const orderDetailHandler = async (
     req: NextApiRequest,
     res: NextApiResponse<any>
 ) => {
-    switch(req.method) {
+    switch (req.method) {
         case 'GET':
             try {
                 res.status(200).json(await getOrderDetail(req));
-            } catch (err:any) {
+            } catch (err: any) {
                 console.error(err)
-                    res.status(500).json({
+                res.status(500).json({
                     message: err.message
                 });
             }
@@ -32,7 +32,6 @@ async function getOrderDetail(req: NextApiRequest) {
     const orderId = BigInt(req.query.id);
 
     // Get record by unique identifier.
-    // Reference: https://www.prisma.io/docs/concepts/components/prisma-client/crud#get-record-by-compound-id-or-compound-unique-identifier
     const order: any = await prisma.order.findUnique({
         where: {
             id: orderId
@@ -47,6 +46,10 @@ async function getOrderDetail(req: NextApiRequest) {
             product: true
         },
     });
+    
+    if (!order) {
+        throw new Error('Order not found.');
+    }
 
     return order;
 }

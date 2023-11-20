@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import multer from 'multer';
-import { Prisma } from '@prisma/client';
+import prisma from 'lib/prisma';
 
 // Set up multer for file uploading
 const upload = multer({ dest: 'uploads/' })

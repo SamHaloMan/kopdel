@@ -22,15 +22,15 @@ CREATE TABLE `products` (
     `title` VARCHAR(100) NOT NULL,
     `type` ENUM('Snack', 'Peralatan', 'Minuman', 'Hampers', 'Selempang', 'Bouquet') NOT NULL,
     `stocked_at` DATETIME(0) NOT NULL,
-    `stock` INTEGER NULL DEFAULT 0,
-    `price` DECIMAL(15, 2) NULL DEFAULT 0.00,
+    `stock` INTEGER NOT NULL DEFAULT 0,
+    `price` DECIMAL(15, 2) NOT NULL DEFAULT 0.0,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `orders` (
-    `id` BIGINT NOT NULL,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `product_id` BIGINT NOT NULL,
     `user_id` BIGINT NOT NULL,
     `quality` TINYINT NOT NULL,
@@ -53,10 +53,26 @@ CREATE TABLE `ratings` (
 
 -- CreateTable
 CREATE TABLE `users` (
-    `id` BIGINT NOT NULL,
-    `balance` DECIMAL(15, 2) NULL DEFAULT 0.0,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `email` VARCHAR(191) NOT NULL,
+    `password` VARCHAR(191) NOT NULL,
     `nickname` VARCHAR(100) NOT NULL,
+    `role` ENUM('ADMIN', 'CONSUMEN') NOT NULL DEFAULT 'CONSUMEN',
+    `balance` DECIMAL(15, 2) NOT NULL DEFAULT 0.0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `users_email_key`(`email`),
     UNIQUE INDEX `nickname`(`nickname`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `images` (
+    `id` BIGINT NOT NULL,
+    `url` VARCHAR(191) NOT NULL,
+    `owner_id` BIGINT NOT NULL,
+    `productId` BIGINT NULL,
+
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
