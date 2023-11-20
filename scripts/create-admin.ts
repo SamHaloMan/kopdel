@@ -16,7 +16,7 @@ async function createAdminUser() {
                 password: hashedPassword,
                 role: 'ADMIN',
                 nickname: 'administrator',
-                balance: 1000,
+                balance: 100000,
             },
         });
 
